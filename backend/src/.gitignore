@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment & Secret Tokens
+.env
+**/.env
+agent-config.json
+**/agent-config.json
+
+# Build Outputs
+.next/
+dist/
+build/
