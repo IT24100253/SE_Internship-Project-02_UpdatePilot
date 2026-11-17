@@ -7,7 +7,11 @@ import {
   LayoutDashboard, Package, CheckCircle2, AlertTriangle, LogOut, Terminal, Copy
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/v1';
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://snowsuit-backside-passenger.ngrok-free.dev/api/v1';
+
+// Bypass Ngrok free-tier browser warning page automatically on all devices
+axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
 
 export default function UpdatePilotApp() {
   // Auth States
