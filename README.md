@@ -1,30 +1,22 @@
-# 🛡️ UpdatePilot — Software Update Intelligence & Management Platform
+# UpdatePilot — Software Update Intelligence & Management Platform
 
-UpdatePilot is a centralized software inventory and automated update management platform designed for Windows endpoints. It enables administrators and users to discover installed applications, identify outdated software via Windows Package Manager (`winget`), and execute verified updates remotely through a secure web dashboard.
+A Windows-first full-stack software update intelligence platform combining a **Next.js** web dashboard, a **Node.js/Express + PostgreSQL (Prisma)** backend API, and a local **Windows Agent (WinGet)** to discover installed applications, detect updates, and execute user-confirmed upgrades safely[cite: 5, 7, 9].
 
-## 🏗️ System Architecture
+## Live Deployment
+- **Web Dashboard:** https://se-internship-project-02-update-pil.vercel.app
 
-The platform consists of three core components:
-1. **Frontend Dashboard (`Next.js` + `Tailwind CSS`):** Web interface for device pairing, application inventory filtering, update confirmation workflows, and audit log tracking.
-2. **Backend API (`Node.js` + `Express` + `PostgreSQL` + `Prisma ORM`):** RESTful API managing JWT user authentication, SHA-256 hashed agent tokens, job queues (`ScanJob`, `UpdateJob`), and audit trails.
-3. **Windows Desktop Agent (`Node.js` + `TypeScript`):** Background service that polls the backend, executes `winget list` and `winget upgrade`, and reports post-update verification results.
+## Local Setup Instructions
+1. **Backend:** `cd backend && cp .env.example .env && npm install && npx prisma migrate dev && npm run dev`
+2. **Frontend:** `cd frontend && cp .env.example .env.local && npm install && npm run dev`
+3. **Windows Agent:** `cd agent && npm install && npm start`
 
-## 🚀 Local Setup & Execution Guide
-
-### 1. Backend Setup
+## Running Automated Tests
 ```bash
 cd backend
-npm install
-npx prisma migrate dev
-npm run dev
+node --test tests/updatepilot.test.js
+```
 
-### 2.Frontend Setup
-cd frontend
-npm install
-npm run dev
-
-### 3.Windows Agent Setup
-cd agent
-npm install
-# Pair device from Web Dashboard -> Agent Setup to generate token
-npm start
+## Security & Known Limitations
+- **Command Allowlisting:** Only validated package identifiers (`[a-zA-Z0-9._-]+`) are passed to `winget upgrade --id`[cite: 9, 10].
+- **User Confirmation:** No silent or unattended updates are executed without explicit user confirmation[cite: 8, 10].
+- **Limitations:** Supports Windows 10/11 environments with WinGet installed; applications not indexed in WinGet are flagged as `UNMATCHED`[cite: 7, 14].
