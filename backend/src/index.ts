@@ -323,32 +323,41 @@ app.post('/api/v1/agent/scans/:jobId/report', authenticateAgent, async (req: Aut
       if (hasUpdate) updatesCount++;
 
       const status = !item.packageId ? 'UNMATCHED' : hasUpdate ? 'UPDATE_AVAILABLE' : 'UP_TO_DATE';
+      const pkgId = item.packageId || null;
+
       const existingApp = await prisma.application.findFirst({
-        where: { deviceId, displayName: item.name },
+        where: {
+          deviceId,
+          displayName: item.name,
+          packageId: pkgId,
+        },
       });
 
-      if (existingApp) {
-        await prisma.application.update({
-          where: { id: existingApp.id },
-          data: {
-            installedVersion: item.installedVersion,
-            availableVersion: item.availableVersion || null,
-            packageId: item.packageId || existingApp.packageId,
-            status,
-          },
-        });
-      } else {
-        await prisma.application.create({
-          data: {
-            deviceId,
-            displayName: item.name,
-            installedVersion: item.installedVersion,
-            availableVersion: item.availableVersion || null,
-            packageId: item.packageId || null,
-            source: item.source || 'winget',
-            status,
-          },
-        });
+      try {
+        if (existingApp) {
+          await prisma.application.update({
+            where: { id: existingApp.id },
+            data: {
+              installedVersion: item.installedVersion,
+              availableVersion: item.availableVersion || null,
+              status,
+            },
+          });
+        } else {
+          await prisma.application.create({
+            data: {
+              deviceId,
+              displayName: item.name,
+              installedVersion: item.installedVersion,
+              availableVersion: item.availableVersion || null,
+              packageId: pkgId,
+              source: item.source || 'winget',
+              status,
+            },
+          });
+        }
+      } catch (itemErr: any) {
+        if (itemErr.code !== 'P2002') throw itemErr;
       }
     }
 
