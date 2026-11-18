@@ -393,11 +393,18 @@ app.post('/api/v1/agent/updates/:jobId/report', authenticateAgent, async (req: A
     const { state, exitCode, verifiedVersion, errorSummary } = req.body;
     const deviceId = req.deviceId!;
 
+    const safeExitCode =
+      typeof exitCode === 'number' && exitCode >= -2147483648 && exitCode <= 2147483647
+        ? Math.trunc(exitCode)
+        : exitCode !== undefined && exitCode !== null
+        ? -1
+        : null;
+
     const job = await prisma.updateJob.update({
       where: { id: jobId },
       data: {
         state,
-        exitCode,
+        exitCode: safeExitCode,
         verificationResult: verifiedVersion ? `Verified: ${verifiedVersion}` : null,
         errorSummary: errorSummary || null,
         completedAt: new Date(),
